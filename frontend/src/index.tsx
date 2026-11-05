@@ -1,22 +1,22 @@
 import { registerPlugin } from '@hubra/plugin-sdk'
-import { IconNote } from '@tabler/icons-react'
-import { NotesScreen } from './NotesScreen'
+import { IconBriefcase } from '@tabler/icons-react'
+import { BoardScreen } from './BoardScreen'
+import { MeetingScreen } from './MeetingScreen'
+import { NextMeetingCard } from './NextMeetingCard'
 import translations from './translations.json'
 
-// Everything here shows only while the module is on for the club and the
-// person has `perm`. Other places to add things: `tabs` (a tab on a built-in
-// screen) and `slots` (account.cards, inventory.item, settings.module.actions).
 registerPlugin({
-  id: 'example',
+  id: 'board',
   routes: [
-    {
-      path: 'example',
-      module: 'example',
-      perm: 'example.notes.read',
-      component: NotesScreen,
-    },
+    { path: 'board', module: 'board', perm: 'board.tasks.read', component: BoardScreen },
+    { path: 'board/planner', module: 'board', perm: 'board.tasks.read', component: BoardScreen },
+    { path: 'board/contracts', module: 'board', perm: 'board.contracts.read', component: BoardScreen },
+    // Members open an invitation from the bell; the API decides what they see.
+    { path: 'board/meetings', module: 'board', component: BoardScreen },
+    { path: 'board/meetings/:id', module: 'board', component: MeetingScreen },
   ],
-  // The nav entry in hubra_example/__init__.py names this icon.
-  icons: { note: IconNote },
+  slots: [{ slot: 'account.cards', module: 'board', component: NextMeetingCard }],
+  // The nav entry in hubra_board/__init__.py names this icon.
+  icons: { briefcase: IconBriefcase },
   translations,
 })
