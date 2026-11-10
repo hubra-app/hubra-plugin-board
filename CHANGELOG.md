@@ -1,5 +1,9 @@
 # Board
 
+## Unreleased
+
+- Dashboard widgets: **Vorstandsaufgaben** (open tasks, only mine or all, due first) and **Nächste Versammlungen** (meetings ahead with date and place; members without the right to run meetings see only those they were invited to). Both need `board.tasks.read`.
+
 ## 1.1.0
 
 - Gives the standard roles access when a club first switches it on (`role_defaults`, docs/roles.md in hubra-app/hubra): Vorstand Bearbeiten, Aktuar/in Alles. Roles without access don't see it; their own data from it stays on their profile. Needs Hubra 0.2.5 or later.

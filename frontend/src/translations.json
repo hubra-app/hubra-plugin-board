@@ -170,6 +170,14 @@
         "intro": "Introduction",
         "introHint": "Shown above the agenda in the invitation.",
         "showAgenda": "See the agenda"
+      },
+      "widget": {
+        "tasks": "Board tasks",
+        "tasksHint": "Open board tasks, the next due first",
+        "mine": "Only mine",
+        "count": "How many",
+        "meetings": "Next meetings",
+        "meetingsHint": "The next meetings and GVs with date and place"
       }
     }
   },
@@ -344,6 +352,14 @@
         "intro": "Einleitung",
         "introHint": "Steht über den Traktanden in der Einladung.",
         "showAgenda": "Traktanden ansehen"
+      },
+      "widget": {
+        "tasks": "Vorstandsaufgaben",
+        "tasksHint": "Offene Aufgaben des Vorstands, die nächsten zuerst",
+        "mine": "Nur meine",
+        "count": "Wie viele",
+        "meetings": "Nächste Versammlungen",
+        "meetingsHint": "Die nächsten Sitzungen und GVs mit Datum und Ort"
       }
     }
   }

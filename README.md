@@ -17,6 +17,9 @@ A plugin for [Hubra](https://hubra.club). What the board (Vorstand) runs: tasks 
 | Verträge | Contracts with cost, term, notice and renewal. Shows the next notice deadline, reminds before it, and adds up the running cost per year. |
 | Generalversammlung | Agenda (standard items to start), invitation deadline from the statutes with a reminder to whoever created the meeting, invitation to all active members with a PDF, sign-in and quorum, minutes and decisions per item, linked polls, minutes PDF. |
 
+Dashboard widgets (Dashboard › Widget hinzufügen): **Vorstandsaufgaben**
+(open tasks, only mine or all) and **Nächste Versammlungen**.
+
 Reminders run once a day per club (`board-reminders-daily`) and go to the bell
 under the member's "Aufgaben" notification setting. The GV invitation always
 comes.

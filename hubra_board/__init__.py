@@ -18,8 +18,11 @@ Permissions:
     board.contracts.read      see contracts and insurances
     board.contracts.update    add and change them
     board.meetings.update     prepare and run general meetings
+
+Dashboard widgets: open tasks (mine or all) and the next meetings.
 """
 
+from hubra.core.contracts import WidgetField, widget_contract
 from hubra.core.modules import Blueprint, Module, NavItem, Schedule
 
 module = Module(
@@ -52,4 +55,30 @@ module = Module(
     ),
     tasks=("hubra_board.tasks",),
     schedule=(Schedule("board-reminders-daily", "hubra_board.tasks.remind", 86400.0),),
+    # Dashboard widgets (hubra_board/widgets.py).
+    provides=(
+        widget_contract(
+            "board.tasks",
+            "hubra_board.widgets:tasks",
+            label="board.widget.tasks",
+            description="board.widget.tasksHint",
+            size="m",
+            view="list",
+            perm="board.tasks.read",
+            fields=(
+                WidgetField("mine", "board.widget.mine", "switch", True),
+                WidgetField("count", "board.widget.count", "number", 5),
+            ),
+        ),
+        widget_contract(
+            "board.meetings",
+            "hubra_board.widgets:meetings",
+            label="board.widget.meetings",
+            description="board.widget.meetingsHint",
+            size="m",
+            view="list",
+            perm="board.tasks.read",
+            fields=(WidgetField("count", "board.widget.count", "number", 3),),
+        ),
+    ),
 )
