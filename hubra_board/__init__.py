@@ -24,6 +24,9 @@ from hubra.core.modules import Blueprint, Module, NavItem, Schedule
 
 module = Module(
     code="board",
+    # Access the standard roles get when a club first switches it on
+    # (docs/roles.md in hubra-app/hubra).
+    role_defaults={"board": "edit", "secretary": "all"},
     name="Board",
     description="Board tasks, year planner, contracts and the general meeting",
     default_enabled=False,

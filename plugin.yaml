@@ -1,7 +1,7 @@
 id: board
 name: Board
-version: "1.0.0"
-hubra: ">=0.2,<1"
+version: "1.1.0"
+hubra: ">=0.2.5,<1"
 description: "What the board (Vorstand) runs: tasks per function that pass to the next holder, a year planner of recurring duties, a register of contracts and insurances with notice reminders, and the general meeting (Generalversammlung) from invitation and agenda to sign-in, quorum and minutes."
 author: Hubra
 homepage: https://github.com/hubra-app/hubra-plugin-board
