@@ -121,11 +121,26 @@ export const QK = {
   duties: ['board', 'duties'] as const,
   contracts: ['board', 'contracts'] as const,
   meetings: ['board', 'meetings'] as const,
+  members: ['board', 'members'] as const,
   meeting: (id: number) => ['board', 'meeting', id] as const,
   attendance: (id: number) => ['board', 'attendance', id] as const,
 }
 
 export const getOptions = () => apiFetch<Options>(`${BASE}/options`)
+
+/** A function that gives the Board role, with who holds it now. */
+export interface BoardFunction {
+  id: number
+  name: string
+  key: string | null
+  description: string | null
+  maxHolders: number
+  holders: { memberId: number; name: string | null; termStart: string | null; termEnd: string | null; upcoming: boolean }[]
+  vacant: boolean
+  openTasks: number
+}
+export const listBoardMembers = () =>
+  apiFetch<{ functions: BoardFunction[]; canManage: boolean }>(`${BASE}/members`)
 
 export const listTasks = (show: 'open' | 'done' | 'mine') => apiFetch<Task[]>(`${BASE}/tasks?show=${show}`)
 export const saveTask = (body: Record<string, unknown>, id?: number) =>

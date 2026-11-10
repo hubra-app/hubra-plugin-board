@@ -9,6 +9,8 @@ registerPlugin({
   id: 'board',
   routes: [
     { path: 'board', module: 'board', perm: 'board.tasks.read', component: BoardScreen },
+    // Who is on the board: every member may see it.
+    { path: 'board/members', module: 'board', component: BoardScreen },
     { path: 'board/planner', module: 'board', perm: 'board.tasks.read', component: BoardScreen },
     { path: 'board/contracts', module: 'board', perm: 'board.contracts.read', component: BoardScreen },
     // Members open an invitation from the bell; the API decides what they see.
