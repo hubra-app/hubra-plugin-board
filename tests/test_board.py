@@ -343,3 +343,45 @@ def test_the_plugin_loads_within_its_limits(app):
         spec = loader.current().get("board")
     assert spec is not None and spec.loaded, spec and spec.error
     assert spec.manifest.get("uses") is not None
+
+
+# ── Dashboard widgets ───────────────────────────────────────────────────────
+
+
+def test_widgets(client, app, db, club):
+    from hubra.core import contracts
+    from hubra.core.models.member import Member
+    from hubra_board.models import BoardMeeting, BoardTask
+
+    kim = db.session.get(Member, club["kim"])
+    now = datetime.now(timezone.utc)
+    db.session.add_all([
+        BoardTask(title="Versicherung prüfen", owner_id=club["kim"], due_on=date(2030, 1, 5)),
+        BoardTask(title="Kasse übergeben", function_id=club["kassier"]),
+        BoardTask(title="Website", owner_id=club["max"]),
+        BoardTask(title="Erledigt", owner_id=club["kim"], done_at=now),
+        BoardMeeting(title="GV 2030", starts_at=now + timedelta(days=30), place="Clubhaus",
+                     invited_at=now),
+        BoardMeeting(title="Vorbereitung", starts_at=now + timedelta(days=5)),
+        BoardMeeting(title="GV alt", starts_at=now - timedelta(days=30), invited_at=now),
+    ])
+    db.session.commit()
+
+    mine = contracts.widget_data("board.tasks", {}, actor=kim)
+    assert [i["label"] for i in mine["items"]] == ["Versicherung prüfen", "Kasse übergeben"]
+    assert mine["items"][0]["sub"] == "05.01.2030"
+    every = contracts.widget_data("board.tasks", {"mine": False, "count": 1}, actor=kim)
+    assert every["total"] == 3 and len(every["items"]) == 1
+
+    # Kim may read tasks but not run meetings: only the invited one ahead.
+    seen = contracts.widget_data("board.meetings", {}, actor=kim)
+    assert [i["label"] for i in seen["items"]] == ["GV 2030"]
+    assert seen["items"][0]["sub"].endswith("· Clubhaus")
+    both = contracts.widget_data("board.meetings", {}, actor=contracts.SYSTEM)
+    assert [i["label"] for i in both["items"]] == ["Vorbereitung", "GV 2030"]
+
+    # A member without the right doesn't get the widget.
+    from hubra.core.contracts import widgets
+    max_ = db.session.get(Member, club["max"])
+    assert "board.tasks" not in [o.contract.name for o in widgets(actor=max_)]
+    assert "board.tasks" in [o.contract.name for o in widgets(actor=kim)]
