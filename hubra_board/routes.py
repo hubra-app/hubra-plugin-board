@@ -1,6 +1,7 @@
 """Board API: /api/v1/app/board.
 
 GET    /options                       functions and polls to choose from
+GET    /members                       the board: functions that give the Board role, with holders
 GET    /tasks?show=open|done|mine     tasks
 POST   /tasks                         {title, notes?, ownerId?, functionId?, dueOn?}
 PATCH  /tasks/<id>                    same fields
@@ -45,9 +46,10 @@ from sqlalchemy import func, select
 from hubra.core.auth.helpers import get_current_member
 from hubra.core.errors import api_error
 from hubra.core.extensions import db
-from hubra.core.models.function import Function
+from hubra.core.models.function import Function, FunctionHolder, function_roles
 from hubra.core.models.member import Member
 from hubra.core.models.poll import Poll
+from hubra.core.models.role import Role
 from hubra.core.permissions import (
     member_has_permission,
     permission_required,
@@ -380,6 +382,89 @@ def options():
             )
         ]
     return jsonify(out)
+
+
+# ── Vorstand ────────────────────────────────────────────────────────────────
+
+# The standard role every board function gives (docs/roles.md in hubra).
+BOARD_ROLE = "board"
+
+
+def board_functions() -> list[Function]:
+    """Functions that give their holders the Board role, by name."""
+    return list(
+        db.session.scalars(
+            select(Function)
+            .join(function_roles, function_roles.c.function_id == Function.id)
+            .join(Role, Role.id == function_roles.c.role_id)
+            .where(Role.key == BOARD_ROLE)
+            .order_by(Function.name)
+            .distinct()
+        )
+    )
+
+
+@board_bp.get("/members")
+@require_member
+def board_members():
+    """Who is on the board: each board function, its current holders and
+    their terms, and how many of its tasks are open. Every member may see it,
+    like the club's functions list."""
+    member = get_current_member()
+    today = date.today()
+    functions = board_functions()
+    ids = [f.id for f in functions]
+    holders: dict[int, list[FunctionHolder]] = {i: [] for i in ids}
+    open_tasks: dict[int, int] = {}
+    if ids:
+        for h in db.session.scalars(
+            select(FunctionHolder)
+            .where(FunctionHolder.function_id.in_(ids))
+            .where((FunctionHolder.term_end.is_(None)) | (FunctionHolder.term_end >= today))
+        ):
+            holders[h.function_id].append(h)
+        open_tasks = dict(
+            db.session.execute(
+                select(BoardTask.function_id, func.count(BoardTask.id))
+                .where(BoardTask.function_id.in_(ids), BoardTask.done_at.is_(None))
+                .group_by(BoardTask.function_id)
+            ).all()
+        )
+    names = _names({h.member_id for hs in holders.values() for h in hs})
+    out = []
+    for f in functions:
+        current = sorted(holders[f.id], key=lambda h: names.get(h.member_id, ""))
+        out.append(
+            {
+                "id": f.id,
+                "name": f.name,
+                "key": f.key,
+                "description": f.description,
+                "maxHolders": f.max_holders,
+                "holders": [
+                    {
+                        "memberId": h.member_id,
+                        "name": names.get(h.member_id),
+                        "termStart": _iso(h.term_start),
+                        "termEnd": _iso(h.term_end),
+                        # Elected but not in office yet.
+                        "upcoming": bool(h.term_start and h.term_start > today),
+                    }
+                    for h in current
+                ],
+                "vacant": not any(
+                    not (h.term_start and h.term_start > today) for h in current
+                ),
+                "openTasks": open_tasks.get(f.id, 0),
+            }
+        )
+    return jsonify(
+        {
+            "functions": out,
+            # Functions are kept in Mitglieder › Funktionen (core).
+            "canManage": member_has_permission(member, "functions.functions.update"),
+        }
+    )
 
 
 # ── Tasks ────────────────────────────────────────────────────────────────────

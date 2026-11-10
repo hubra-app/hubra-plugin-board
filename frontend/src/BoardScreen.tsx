@@ -16,7 +16,7 @@ import {
   TextInput,
   Textarea,
 } from '@mantine/core'
-import { IconCalendarRepeat, IconFileCertificate, IconListCheck, IconPencil, IconPlus, IconTrash, IconUsers } from '@tabler/icons-react'
+import { IconCalendarRepeat, IconFileCertificate, IconId, IconListCheck, IconPencil, IconPlus, IconTrash, IconUsers } from '@tabler/icons-react'
 import {
   ConfirmModal,
   EmptyState,
@@ -42,6 +42,7 @@ import {
   getOptions,
   listContracts,
   listDuties,
+  listBoardMembers,
   listMeetings,
   listTasks,
   saveContract,
@@ -57,7 +58,7 @@ import {
 } from './api'
 import { DueBadge, WhoField, WhoLabel, type WhoValue } from './common'
 
-type TabId = 'tasks' | 'planner' | 'contracts' | 'meetings'
+type TabId = 'tasks' | 'members' | 'planner' | 'contracts' | 'meetings'
 
 /** Vorstand: tasks, year planner, contracts and the general meetings. */
 export function BoardScreen() {
@@ -69,6 +70,7 @@ export function BoardScreen() {
   const part = location.pathname.split('/app/board')[1]?.replace(/^\//, '') ?? ''
   const tabs = [
     { id: 'tasks', label: t('board.tabs.tasks'), icon: <IconListCheck size={16} />, show: can?.tasksRead },
+    { id: 'members', label: t('board.tabs.members'), icon: <IconId size={16} />, show: true },
     { id: 'planner', label: t('board.tabs.planner'), icon: <IconCalendarRepeat size={16} />, show: can?.tasksRead },
     { id: 'contracts', label: t('board.tabs.contracts'), icon: <IconFileCertificate size={16} />, show: can?.contractsRead },
     { id: 'meetings', label: t('board.tabs.meetings'), icon: <IconUsers size={16} />, show: true },
@@ -87,10 +89,93 @@ export function BoardScreen() {
         onTabChange={(id) => navigate(id === 'tasks' ? '/app/board' : `/app/board/${id}`)}
       />
       {active === 'tasks' && <TasksTab options={options.data} />}
+      {active === 'members' && <MembersTab />}
       {active === 'planner' && <PlannerTab options={options.data} />}
       {active === 'contracts' && <ContractsTab options={options.data} />}
       {active === 'meetings' && <MeetingsTab options={options.data} />}
     </>
+  )
+}
+
+// ── Vorstand ─────────────────────────────────────────────────────────────────
+
+/** The board: the functions that give the Board role and who holds them. */
+function MembersTab() {
+  const { t } = useT()
+  const navigate = useNavigate()
+  const data = useQuery({ queryKey: QK.members, queryFn: listBoardMembers })
+  if (data.error) return <ErrorBanner message={errorText(data.error)} onRetry={() => data.refetch()} />
+  if (data.isLoading || !data.data) return <LoadingSpinner />
+  const { functions, canManage } = data.data
+  const manage = canManage ? (
+    <Button variant="default" leftSection={<IconPencil size={16} />} onClick={() => navigate('/app/members/functions')}>
+      {t('board.members.manage')}
+    </Button>
+  ) : null
+  if (!functions.length)
+    return (
+      <EmptyState
+        icon={<IconId size={28} />}
+        title={t('board.members.empty')}
+        description={t('board.members.emptyHint')}
+        action={canManage ? { label: t('board.members.manage'), onClick: () => navigate('/app/members/functions') } : undefined}
+      />
+    )
+  return (
+    <Stack gap="md">
+      <Group justify="space-between" wrap="wrap">
+        <Text fz="sm" c="dimmed">
+          {t('board.members.hint')}
+        </Text>
+        {manage}
+      </Group>
+      <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' }}>
+        {functions.map((f) => (
+          <Paper key={f.id} withBorder p="md" radius="md">
+            <Group justify="space-between" align="flex-start" gap={8} wrap="nowrap">
+              <Text fw={600}>{f.name}</Text>
+              {f.vacant && (
+                <Badge color="orange" variant="light">
+                  {t('board.members.vacant')}
+                </Badge>
+              )}
+            </Group>
+            {f.description && (
+              <Text fz="xs" c="dimmed" mt={2}>
+                {f.description}
+              </Text>
+            )}
+            <Stack gap={4} mt="sm">
+              {f.holders.map((h) => (
+                <Group key={h.memberId} gap={6} wrap="nowrap">
+                  <Text fz="sm">{h.name ?? '—'}</Text>
+                  {h.upcoming && h.termStart ? (
+                    <Text fz="xs" c="dimmed">
+                      {t('board.members.from', { date: formatDay(h.termStart) })}
+                    </Text>
+                  ) : h.termEnd ? (
+                    <Text fz="xs" c="dimmed">
+                      {t('board.members.until', { date: formatDay(h.termEnd) })}
+                    </Text>
+                  ) : null}
+                </Group>
+              ))}
+            </Stack>
+            {f.openTasks > 0 && (
+              <Button
+                variant="subtle"
+                size="compact-xs"
+                mt="sm"
+                leftSection={<IconListCheck size={14} />}
+                onClick={() => navigate('/app/board')}
+              >
+                {t('board.members.openTasks', { count: f.openTasks })}
+              </Button>
+            )}
+          </Paper>
+        ))}
+      </div>
+    </Stack>
   )
 }
 

@@ -1,5 +1,9 @@
 # Board
 
+## Unreleased
+
+- **Funktionen** (new tab): who is on the board. Lists every function that gives the Board role (Präsidium, Aktuar/in, Kassier/in … from Mitglieder › Funktionen), its current holders with their term, "Unbesetzt" when nobody holds it, holders elected for later, and how many of its tasks are open. Every member may see it; "Funktionen verwalten" opens Mitglieder › Funktionen for those who may change them. New `GET /members`.
+
 ## 1.1.0
 
 - Gives the standard roles access when a club first switches it on (`role_defaults`, docs/roles.md in hubra-app/hubra): Vorstand Bearbeiten, Aktuar/in Alles. Roles without access don't see it; their own data from it stays on their profile. Needs Hubra 0.2.5 or later.

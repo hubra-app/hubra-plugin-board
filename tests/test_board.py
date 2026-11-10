@@ -131,6 +131,47 @@ def test_a_task_for_someone_tells_them(client, db, club):
     )
 
 
+def test_the_board_lists_functions_that_give_the_board_role(client, db, club):
+    """Vorstand: functions giving the Board role, with holders; others left out."""
+    from hubra.core.models.function import Function, FunctionHolder
+    from hubra.core.models.role import Role
+
+    board = db.session.scalar(select(Role).where(Role.key == "board"))
+    if board is None:
+        board = Role(name="Vorstand", key="board")
+        db.session.add(board)
+    praesidium = Function(name="Präsidium")
+    praesidium.roles.append(board)
+    kassier = db.session.get(Function, club["kassier"])
+    kassier.roles.append(board)
+    db.session.add(praesidium)
+    db.session.add(Function(name="Platzwart"))  # no Board role
+    db.session.flush()
+    db.session.add(
+        FunctionHolder(
+            function_id=praesidium.id,
+            member_id=club["max"],
+            term_start=date.today() + timedelta(days=30),
+        )
+    )
+    from hubra_board.models import BoardTask
+
+    db.session.add(BoardTask(title="Budget", function_id=kassier.id))
+    db.session.commit()
+
+    # Every member may see it.
+    _login(client, "max@test.ch")
+    body = client.get(f"{BASE}/members").get_json()
+    rows = {f["name"]: f for f in body["functions"]}
+    assert set(rows) == {"Kassier", "Präsidium"}
+    assert [h["name"] for h in rows["Kassier"]["holders"]] == ["Test Kim"]
+    assert rows["Kassier"]["vacant"] is False and rows["Kassier"]["openTasks"] == 1
+    # Elected for later: shown as upcoming, the office still counts as vacant.
+    assert rows["Präsidium"]["holders"][0]["upcoming"] is True
+    assert rows["Präsidium"]["vacant"] is True
+    assert body["canManage"] is False
+
+
 def test_members_without_the_right_see_no_tasks(client, club):
     _login(client, "max@test.ch")
     assert client.get(f"{BASE}/tasks").status_code == 403

@@ -13,6 +13,7 @@ A plugin for [Hubra](https://hubra.club). What the board (Vorstand) runs: tasks 
 | Tab | |
 | --- | --- |
 | Aufgaben | Tasks for a person or a function's holders, with due dates. A bell reminder goes once when a task is due within three days. |
+| Funktionen | Who is on the board: every function that gives the Board role, with its holders and terms, vacancies and open tasks. Every member sees it. |
 | Jahresplan | Recurring duties on a fixed day each year. Within the duty's lead time it becomes a task and the person in charge hears about it. |
 | Verträge | Contracts with cost, term, notice and renewal. Shows the next notice deadline, reminds before it, and adds up the running cost per year. |
 | Generalversammlung | Agenda (standard items to start), invitation deadline from the statutes with a reminder to whoever created the meeting, invitation to all active members with a PDF, sign-in and quorum, minutes and decisions per item, linked polls, minutes PDF. |

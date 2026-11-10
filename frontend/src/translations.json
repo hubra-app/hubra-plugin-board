@@ -21,7 +21,8 @@
         "tasks": "Tasks",
         "planner": "Year planner",
         "contracts": "Contracts",
-        "meetings": "General meeting"
+        "meetings": "General meeting",
+        "members": "Functions"
       },
       "who": "Responsible",
       "person": "Person",
@@ -178,6 +179,16 @@
         "count": "How many",
         "meetings": "Next meetings",
         "meetingsHint": "The next meetings and GVs with date and place"
+      },
+      "members": {
+        "hint": "Who is on the board: every function that gives the Board role, and who holds it.",
+        "manage": "Manage functions",
+        "empty": "No board functions yet",
+        "emptyHint": "A function belongs to the board when it gives the Board role (Members › Functions).",
+        "vacant": "Vacant",
+        "from": "from {{date}}",
+        "until": "until {{date}}",
+        "openTasks": "{{count}} open tasks"
       }
     }
   },
@@ -203,7 +214,8 @@
         "tasks": "Aufgaben",
         "planner": "Jahresplan",
         "contracts": "Verträge",
-        "meetings": "Generalversammlung"
+        "meetings": "Generalversammlung",
+        "members": "Funktionen"
       },
       "who": "Zuständig",
       "person": "Person",
@@ -360,6 +372,16 @@
         "count": "Wie viele",
         "meetings": "Nächste Versammlungen",
         "meetingsHint": "Die nächsten Sitzungen und GVs mit Datum und Ort"
+      },
+      "members": {
+        "hint": "Wer im Vorstand ist: jede Funktion, die die Rolle Vorstand gibt, und wer sie innehat.",
+        "manage": "Funktionen verwalten",
+        "empty": "Noch keine Vorstandsfunktionen",
+        "emptyHint": "Eine Funktion gehört zum Vorstand, wenn sie die Rolle Vorstand gibt (Mitglieder › Funktionen).",
+        "vacant": "Unbesetzt",
+        "from": "ab {{date}}",
+        "until": "bis {{date}}",
+        "openTasks": "{{count}} offene Aufgaben"
       }
     }
   }
