@@ -838,8 +838,14 @@ def get_meeting(meeting_id: int):
     m = db.session.get(BoardMeeting, meeting_id)
     if m is None or not _can_see(m, member):
         return api_error("NOT_FOUND", "Not found", 404)
+    manager = member_has_permission(member, MEETINGS)
     out = _meeting(m, member.id, full=True)
-    out["canManage"] = member_has_permission(member, MEETINGS)
+    if not manager and m.closed_at is None:
+        # The minutes are the board's draft until the meeting is closed,
+        # as for minutes.pdf; decisions show as they are taken.
+        for item in out["agenda"]:
+            item["minutes"] = None
+    out["canManage"] = manager
     return jsonify(out)
 
 
@@ -900,7 +906,11 @@ def order_items(meeting_id: int):
         return err
     ids = _body().get("ids")
     items = {i.id: i for i in _items(m.id)}
-    if not isinstance(ids, list) or sorted(ids) != sorted(items):
+    if (
+        not isinstance(ids, list)
+        or not all(isinstance(i, int) and not isinstance(i, bool) for i in ids)
+        or sorted(ids) != sorted(items)
+    ):
         raise Invalid("ids must list every agenda item of the meeting once")
     for pos, item_id in enumerate(ids, start=1):
         items[item_id].position = pos

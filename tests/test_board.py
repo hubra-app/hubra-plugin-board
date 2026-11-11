@@ -426,3 +426,71 @@ def test_widgets(client, app, db, club):
     max_ = db.session.get(Member, club["max"])
     assert "board.tasks" not in [o.contract.name for o in widgets(actor=max_)]
     assert "board.tasks" in [o.contract.name for o in widgets(actor=kim)]
+
+
+# ── Security audit 2026-11 ───────────────────────────────────────────────────
+
+
+def test_only_holders_in_office_answer_for_a_function(client, db, club):
+    """A past holder (term over) or one elected for later neither closes the
+    function's tasks nor hears about them, as Hubra gives a function's roles
+    only during the term."""
+    from hubra.core.models.function import FunctionHolder
+    from hubra_board import services
+
+    task = client.post(
+        f"{BASE}/tasks", json={"title": "Budget", "functionId": club["kassier"]}
+    ).get_json()
+    today = date.today()
+    for start, end in (
+        (today - timedelta(days=400), today - timedelta(days=1)),
+        (today + timedelta(days=30), None),
+    ):
+        db.session.execute(
+            FunctionHolder.__table__.update()
+            .where(FunctionHolder.function_id == club["kassier"])
+            .values(term_start=start, term_end=end)
+        )
+        db.session.commit()
+        assert services.holders(club["kassier"]) == []
+        _login(client, "kim@test.ch")
+        assert client.get(f"{BASE}/tasks?show=mine").get_json() == []
+        r = client.post(f"{BASE}/tasks/{task['id']}/done", json={"done": True})
+        assert r.status_code == 403
+        _login(client, "admin@test.ch")
+
+    db.session.execute(
+        FunctionHolder.__table__.update()
+        .where(FunctionHolder.function_id == club["kassier"])
+        .values(term_start=today - timedelta(days=10), term_end=today)
+    )
+    db.session.commit()
+    assert services.holders(club["kassier"]) == [club["kim"]]
+
+
+def test_members_see_the_minutes_only_once_the_meeting_is_closed(client, club):
+    gv = _gv(client)
+    item = gv["agenda"][0]["id"]
+    client.patch(
+        f"{BASE}/agenda/{item}", json={"minutes": "Entwurf", "decision": "Ja"}
+    )
+    client.post(f"{BASE}/meetings/{gv['id']}/invite")
+    _login(client, "max@test.ch")
+    seen = client.get(f"{BASE}/meetings/{gv['id']}").get_json()["agenda"][0]
+    assert seen["minutes"] is None and seen["decision"] == "Ja"
+    _login(client, "admin@test.ch")
+    assert (
+        client.get(f"{BASE}/meetings/{gv['id']}").get_json()["agenda"][0]["minutes"]
+        == "Entwurf"
+    )
+    client.post(f"{BASE}/meetings/{gv['id']}/close")
+    _login(client, "max@test.ch")
+    seen = client.get(f"{BASE}/meetings/{gv['id']}").get_json()["agenda"][0]
+    assert seen["minutes"] == "Entwurf"
+
+
+def test_agenda_order_refuses_ids_that_are_not_numbers(client, club):
+    gv = _gv(client)
+    for bad in (["a", 1], [None], [1.5], "1,2"):
+        r = client.put(f"{BASE}/meetings/{gv['id']}/agenda/order", json={"ids": bad})
+        assert r.status_code == 400, bad

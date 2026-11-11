@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Security: only holders whose term runs today answer for a function. A past holder (term over) or one elected for later no longer sees the function's tasks as theirs, can't close them and gets no reminders for them; the same rule Hubra uses for the roles a function gives.
+- Security: members see an agenda item's minutes only once the meeting is closed, as with the minutes PDF (`GET /meetings/<id>` sent the board's draft minutes before). Decisions still show as they are taken.
+- Reordering the agenda refuses ids that aren't whole numbers with 400 instead of failing with 500.
 - The responsible function can be cleared with × (dropdowns no longer empty themselves on a second click).
 - **Funktionen** (new tab): who is on the board. Lists every function that gives the Board role (Präsidium, Aktuar/in, Kassier/in … from Mitglieder › Funktionen), its current holders with their term, "Unbesetzt" when nobody holds it, holders elected for later, and how many of its tasks are open. Every member may see it; "Funktionen verwalten" opens Mitglieder › Funktionen for those who may change them. New `GET /members`.
 
