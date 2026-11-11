@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- The responsible function can be cleared with × (dropdowns no longer empty themselves on a second click).
 - **Funktionen** (new tab): who is on the board. Lists every function that gives the Board role (Präsidium, Aktuar/in, Kassier/in … from Mitglieder › Funktionen), its current holders with their term, "Unbesetzt" when nobody holds it, holders elected for later, and how many of its tasks are open. Every member may see it; "Funktionen verwalten" opens Mitglieder › Funktionen for those who may change them. New `GET /members`.
 
 ## 1.1.0
