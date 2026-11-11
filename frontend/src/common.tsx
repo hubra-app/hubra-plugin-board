@@ -54,6 +54,7 @@ export function WhoField({
               onChange={(id) => onChange({ ownerId: null, functionId: id ? Number(id) : null })}
               placeholder={functions.length ? undefined : t('board.noFunctions')}
               searchable
+              clearable
             />
           )}
         </div>
