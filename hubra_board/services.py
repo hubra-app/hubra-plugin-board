@@ -6,7 +6,7 @@ import calendar
 import logging
 from datetime import date, datetime, timedelta, timezone
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 
 from hubra.core.extensions import db
 from hubra.core.models.function import FunctionHolder
@@ -95,11 +95,22 @@ def invite_by(meeting: BoardMeeting) -> date:
 # ── Who is responsible ───────────────────────────────────────────────────────
 
 
+def _in_office():
+    """Holders whose term runs today, as Hubra counts them for the roles a
+    function gives: a past holder (term over) or one elected but not in
+    office yet is not responsible for the function's tasks."""
+    today = date.today()
+    return (
+        or_(FunctionHolder.term_start.is_(None), FunctionHolder.term_start <= today),
+        or_(FunctionHolder.term_end.is_(None), FunctionHolder.term_end >= today),
+    )
+
+
 def function_ids_of(member_id: int) -> set[int]:
     return set(
         db.session.scalars(
             select(FunctionHolder.function_id).where(
-                FunctionHolder.member_id == member_id
+                FunctionHolder.member_id == member_id, *_in_office()
             )
         )
     )
@@ -111,7 +122,7 @@ def holders(function_id: int | None) -> list[int]:
     return list(
         db.session.scalars(
             select(FunctionHolder.member_id).where(
-                FunctionHolder.function_id == function_id
+                FunctionHolder.function_id == function_id, *_in_office()
             )
         )
     )
