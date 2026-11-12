@@ -1,6 +1,6 @@
 # Board
 
-[![Test and release](https://github.com/hubra-app/hubra-plugin-board/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/hubra-app/hubra-plugin-board/actions/workflows/release.yml?query=branch%3Amain) [![Release](https://img.shields.io/github/v/release/hubra-app/hubra-plugin-board)](https://github.com/hubra-app/hubra-plugin-board/releases/latest) [![License: all rights reserved](https://img.shields.io/badge/license-all%20rights%20reserved-lightgrey)](LICENSE)
+[![Test and release](https://github.com/hubra-app/hubra-plugin-board/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/hubra-app/hubra-plugin-board/actions/workflows/release.yml?query=branch%3Amain) [![Release](https://img.shields.io/github/v/release/hubra-app/hubra-plugin-board)](https://github.com/hubra-app/hubra-plugin-board/releases/latest) [![License: all rights reserved](https://img.shields.io/badge/license-all%20rights%20reserved-lightgrey)](LICENSE) [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-bitsandbricks-ffdd00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/bitsandbricks)
 
 A plugin for [Hubra](https://hubra.club). What the board (Vorstand) runs: tasks per function that pass to the next holder, a year planner of recurring duties, a register of contracts and insurances with notice reminders, and the general meeting (Generalversammlung) from invitation and agenda to sign-in, quorum and minutes.
 
