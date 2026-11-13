@@ -1,6 +1,6 @@
 # Board
 
-## Unreleased
+## 1.2.0
 
 - The GV invitation and minutes PDFs carry the club's letterhead (logo, name, address, contact line, page numbers, primary colour), the same as invoices. Hubra lays them out through `pdf.render` (hubra#332); the plugin no longer runs WeasyPrint itself. Needs Hubra 0.2.6 or later.
 - Security: only holders whose term runs today answer for a function. A past holder (term over) or one elected for later no longer sees the function's tasks as theirs, can't close them and gets no reminders for them; the same rule Hubra uses for the roles a function gives.
