@@ -1,5 +1,9 @@
 # Board
 
+## Unreleased
+
+- Date, date-and-time and time fields use Hubra's date pickers: dd.mm.yyyy, a calendar that starts on Monday and 24-hour times, whatever the browser language; typed dates like 1.2.26 work too. Needs Hubra 0.2.6 or later.
+
 ## 1.2.0
 
 - The GV invitation and minutes PDFs carry the club's letterhead (logo, name, address, contact line, page numbers, primary colour), the same as invoices. Hubra lays them out through `pdf.render` (hubra#332); the plugin no longer runs WeasyPrint itself. Needs Hubra 0.2.6 or later.
