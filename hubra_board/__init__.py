@@ -55,6 +55,8 @@ module = Module(
     ),
     tasks=("hubra_board.tasks",),
     schedule=(Schedule("board-reminders-daily", "hubra_board.tasks.remind", 86400.0),),
+    # The invitation and minutes PDFs on the club's letterhead (pdf.py).
+    consumes={"pdf.render": ">=1,<2"},
     # Dashboard widgets (hubra_board/widgets.py).
     provides=(
         widget_contract(

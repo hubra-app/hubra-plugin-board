@@ -1,4 +1,9 @@
-"""The GV invitation and minutes as PDF (WeasyPrint, no outside files)."""
+"""The GV invitation and minutes as PDF, on the club's letterhead.
+
+Hubra lays them out (``pdf.render``, docs/contracts.md "PDFs" in
+hubra-app/hubra): logo, name and address on every page, contact line and
+page numbers at the bottom. This module only writes the body.
+"""
 
 from __future__ import annotations
 
@@ -8,13 +13,9 @@ from jinja2 import Environment, select_autoescape
 
 _env = Environment(autoescape=select_autoescape(default=True, default_for_string=True))
 
+# Page, fonts, h1/h2 and the colours come from the letterhead.
 _STYLE = """
-@page { size: A4; margin: 22mm 20mm 20mm 22mm;
-  @bottom-right { content: counter(page) " / " counter(pages); font-size: 8pt; color: #777; } }
-body { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 10pt; color: #222; line-height: 1.45; }
-.club { font-size: 9pt; color: #666; text-transform: uppercase; letter-spacing: .08em; }
-h1 { font-size: 17pt; margin: 4mm 0 2mm; }
-h2 { font-size: 11pt; margin: 6mm 0 1.5mm; }
+.board { line-height: 1.45; }
 .meta { margin: 0 0 6mm; }
 .meta td { padding: 0 6mm 1mm 0; vertical-align: top; }
 .meta td:first-child { color: #666; }
@@ -22,7 +23,7 @@ ol.agenda { padding-left: 6mm; }
 ol.agenda li { margin-bottom: 2mm; }
 .desc, .min { white-space: pre-wrap; }
 .desc { color: #555; }
-.decision { margin-top: 1.5mm; padding: 1.5mm 3mm; border-left: 2pt solid #6d4bd8; background: #f5f2fd; }
+.decision { margin-top: 1.5mm; padding: 1.5mm 3mm; border-left: 2pt solid currentColor; background: #f5f5f5; }
 .vote { margin-top: 1.5mm; font-size: 9pt; }
 .vote td { padding: 0 4mm 0 0; }
 .sign { margin-top: 16mm; width: 100%; }
@@ -32,9 +33,7 @@ ol.agenda li { margin-bottom: 2mm; }
 """
 
 _INVITATION = _env.from_string(
-    """<!doctype html><html lang="{{ lang }}"><head><meta charset="utf-8">
-<style>{{ style }}</style></head><body>
-<div class="club">{{ club }}</div>
+    """<style>{{ style }}</style><div class="board">
 <h1>{{ t.invitation }}: {{ m.title }}</h1>
 <table class="meta">
 <tr><td>{{ t.when }}</td><td>{{ when }}</td></tr>
@@ -47,13 +46,11 @@ _INVITATION = _env.from_string(
 {% if i.description %}<div class="desc">{{ i.description }}</div>{% endif %}</li>
 {% endfor %}</ol>
 <p class="small">{{ t.issued }} {{ issued }}</p>
-</body></html>"""
+</div>"""
 )
 
 _MINUTES = _env.from_string(
-    """<!doctype html><html lang="{{ lang }}"><head><meta charset="utf-8">
-<style>{{ style }}</style></head><body>
-<div class="club">{{ club }}</div>
+    """<style>{{ style }}</style><div class="board">
 <h1>{{ t.minutes }}: {{ m.title }}</h1>
 <table class="meta">
 <tr><td>{{ t.when }}</td><td>{{ when }}</td></tr>
@@ -76,7 +73,7 @@ _MINUTES = _env.from_string(
 <p class="small">{{ present|join(", ") }}</p>
 <table class="sign"><tr><td>{{ t.chair }}</td><td>{{ t.taker }}</td></tr></table>
 <p class="small">{{ t.issued }} {{ issued }}{% if not m.closed_at %} · {{ t.draft }}{% endif %}</p>
-</body></html>"""
+</div>"""
 )
 
 _TEXTS = {
@@ -135,16 +132,14 @@ def _when(dt: datetime, lang: str) -> str:
     return f"{mail_date(local.date(), lang)}, {local:%H:%M}"
 
 
-def _render(template, **ctx) -> bytes:
-    from weasyprint import HTML
+def _render(template, title: str, **ctx) -> bytes:
+    import base64
 
-    from hubra.core.services.email import club_display_name
-    from hubra.core.services.qr_bill import _no_fetch
+    from hubra.core.contracts import SYSTEM, call
 
     lang = ctx.pop("lang")
-    html = template.render(
+    body = template.render(
         style=_STYLE,
-        club=club_display_name(),
         lang=lang,
         t=_TEXTS[lang],
         issued=datetime.now(timezone.utc).strftime(
@@ -152,13 +147,16 @@ def _render(template, **ctx) -> bytes:
         ),
         **ctx,
     )
-    return HTML(string=html, url_fetcher=_no_fetch()).write_pdf()
+    # SYSTEM: the route already checked who may read the meeting.
+    out = call("pdf.render", title=title[:200], body_html=body, lang=lang, actor=SYSTEM)
+    return base64.b64decode(out["pdf_base64"])
 
 
 def invitation(meeting, items, lang: str | None) -> bytes:
     lang = _lang(lang)
     return _render(
         _INVITATION,
+        f"{_TEXTS[lang]['invitation']}: {meeting.title}",
         lang=lang,
         m=meeting,
         items=items,
@@ -170,6 +168,7 @@ def minutes(meeting, items, present: list[str], polls: dict, lang: str | None) -
     lang = _lang(lang)
     return _render(
         _MINUTES,
+        f"{_TEXTS[lang]['minutes']}: {meeting.title}",
         lang=lang,
         m=meeting,
         items=items,
