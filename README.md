@@ -4,7 +4,7 @@
 
 A plugin for [Hubra](https://hubra.club). What the board (Vorstand) runs: tasks per function that pass to the next holder, a year planner of recurring duties, a register of contracts and insurances with notice reminders, and the general meeting (Generalversammlung) from invitation and agenda to sign-in, quorum and minutes.
 
-**Version** 1.0.0 · **Works with** Hubra >=0.2,<1 · **Plugin id** `board` · **Needs** the members and functions modules
+**Version** 1.2.0 · **Works with** Hubra >=0.2.6,<1 · **Plugin id** `board` · **Needs** the members and functions modules
 
 ![Contracts](docs/screenshots/contracts.png)
 
