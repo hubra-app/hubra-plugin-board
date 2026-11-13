@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from datetime import date, datetime, timedelta, timezone
 
+from unittest.mock import patch
+
 import pytest
 from sqlalchemy import select
 
@@ -313,8 +315,15 @@ def test_the_gv_from_invitation_to_minutes(client, db, club):
     _login(client, "max@test.ch")
     seen = client.get(f"{BASE}/meetings/{gv['id']}").get_json()
     assert seen["canManage"] is False and len(seen["agenda"]) == 10
-    pdf = client.get(f"{BASE}/meetings/{gv['id']}/invitation.pdf")
+    # On the club's letterhead: Hubra lays it out (pdf.render).
+    import hubra.core.contracts as contracts
+
+    with patch.object(contracts, "call", wraps=contracts.call) as spy:
+        pdf = client.get(f"{BASE}/meetings/{gv['id']}/invitation.pdf")
     assert pdf.status_code == 200 and pdf.data[:4] == b"%PDF"
+    (name,), kw = spy.call_args
+    assert name == "pdf.render" and kw["title"] == "Einladung: GV 2026"
+    assert "<html" not in kw["body_html"] and "Traktanden" in kw["body_html"]
     # Minutes only once the meeting is closed.
     assert client.get(f"{BASE}/meetings/{gv['id']}/minutes.pdf").status_code == 404
     assert (
