@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- The GV invitation and minutes PDFs carry the club's letterhead (logo, name, address, contact line, page numbers, primary colour), the same as invoices. Hubra lays them out through `pdf.render` (hubra#332); the plugin no longer runs WeasyPrint itself. Needs Hubra 0.2.6 or later (raise `hubra:` in plugin.yaml at release).
+- The GV invitation and minutes PDFs carry the club's letterhead (logo, name, address, contact line, page numbers, primary colour), the same as invoices. Hubra lays them out through `pdf.render` (hubra#332); the plugin no longer runs WeasyPrint itself. Needs Hubra 0.2.6 or later.
 - Security: only holders whose term runs today answer for a function. A past holder (term over) or one elected for later no longer sees the function's tasks as theirs, can't close them and gets no reminders for them; the same rule Hubra uses for the roles a function gives.
 - Security: members see an agenda item's minutes only once the meeting is closed, as with the minutes PDF (`GET /meetings/<id>` sent the board's draft minutes before). Decisions still show as they are taken.
 - Reordering the agenda refuses ids that aren't whole numbers with 400 instead of failing with 500.
