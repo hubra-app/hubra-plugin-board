@@ -35,6 +35,7 @@ import {
 } from '@tabler/icons-react'
 import {
   ConfirmModal,
+  DateTimeField,
   ErrorBanner,
   Field,
   LoadingSpinner,
@@ -610,7 +611,7 @@ function MeetingModal({ meeting, onClose, onSaved }: { meeting: Meeting; onClose
       </Field>
       <Group grow align="flex-start">
         <Field label={t('board.meetings.startsAt')}>
-          <TextInput type="datetime-local" value={v.startsAt} onChange={(e) => set('startsAt', e.currentTarget.value)} />
+          <DateTimeField value={v.startsAt} onChange={(val) => set('startsAt', val)} />
         </Field>
         <Field label={t('board.meetings.place')}>
           <TextInput value={v.place} onChange={(e) => set('place', e.currentTarget.value)} />

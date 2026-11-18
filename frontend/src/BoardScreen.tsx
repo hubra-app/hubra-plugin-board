@@ -19,15 +19,17 @@ import {
 import { IconCalendarRepeat, IconFileCertificate, IconId, IconListCheck, IconPencil, IconPlus, IconTrash, IconUsers } from '@tabler/icons-react'
 import {
   ConfirmModal,
+  DateField,
+  DateTimeField,
   EmptyState,
   ErrorBanner,
   Field,
+  formatCHF,
   LoadingSpinner,
   Modal,
   PageHead,
   Seg,
   Tabs,
-  formatCHF,
   useT,
   useToast,
 } from '@hubra/plugin-sdk'
@@ -360,7 +362,7 @@ function TaskModal({
       </Field>
       <WhoField value={who} onChange={setWho} options={options} />
       <Field label={t('board.dueOn')}>
-        <TextInput type="date" value={dueOn} onChange={(e) => setDueOn(e.currentTarget.value)} />
+        <DateField value={dueOn} onChange={setDueOn} />
       </Field>
       <Field label={t('board.notes')}>
         <Textarea autosize minRows={2} value={notes} onChange={(e) => setNotes(e.currentTarget.value)} />
@@ -803,10 +805,10 @@ function ContractModal({
       </Group>
       <Group grow align="flex-start">
         <Field label={t('board.contracts.startsOn')}>
-          <TextInput type="date" value={v.startsOn} onChange={(e) => set('startsOn', e.currentTarget.value)} />
+          <DateField value={v.startsOn} onChange={(val) => set('startsOn', val)} />
         </Field>
         <Field label={t('board.contracts.endsOn')} hint={t('board.contracts.endsOnHint')}>
-          <TextInput type="date" value={v.endsOn} onChange={(e) => set('endsOn', e.currentTarget.value)} />
+          <DateField value={v.endsOn} onChange={(val) => set('endsOn', val)} />
         </Field>
       </Group>
       <Group grow align="flex-start">
@@ -974,7 +976,7 @@ function NewMeetingModal({ onClose, onDone }: { onClose: () => void; onDone: (id
       </Field>
       <Group grow align="flex-start">
         <Field label={t('board.meetings.startsAt')}>
-          <TextInput type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.currentTarget.value)} />
+          <DateTimeField value={startsAt} onChange={setStartsAt} />
         </Field>
         <Field label={t('board.meetings.inviteDays')} hint={t('board.meetings.inviteDaysHint')}>
           <NumberInput min={0} max={120} value={inviteDays} onChange={setInviteDays} />
